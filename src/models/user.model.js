@@ -1,6 +1,5 @@
 import mongoose, { trusted } from "mongoose";
 import { Schema } from "mongoose";
-import { Aggregate } from "mongoose";
 
 const userSchema = new Schema({
    
