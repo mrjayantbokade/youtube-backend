@@ -21,4 +21,18 @@ app.use(express.json({limit: "16kb"})) // inorder to prevent server crash we gav
 app.use(express.static("public"))   // file and other things that we want to store, we can put it in the public folder/directory
 app.use(cookieParser()) // uses the browser cookies of the user efficiently
 
+
+//routes import 
+import userRouter from "./routes/user.routes.js"
+
+
+//dont use .get() method 
+//it is used when we do things in one file 
+//but in here we dont seggregation so we need to use
+// .use()  method for this
+
+
+//firstly go to /users then pass control to the userRouter 
+app.use("/api/v1/users", userRouter)
+
 export { app }

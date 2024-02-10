@@ -9,13 +9,13 @@ import {DB_NAME} from "./constants.js"
 import connectDB from "./db/dbConnection.js"
 import express from "express"
 import { error } from "console"
+import {app} from "./app.js"
 
 dotenv.config({
     path: "./env"
 })
 
 
-const app = express()
 
 connectDB().then(() =>{
 
