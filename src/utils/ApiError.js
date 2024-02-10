@@ -6,7 +6,7 @@ class ApiError extends Error{
         statusCode,
         message = "Something went wrong in api errors response go to Api Error or deep",
         errors = [],
-        statck = ""
+        stack = ""
     ){
         super(message)
         this.statusCode = statusCode
@@ -16,8 +16,8 @@ class ApiError extends Error{
         this.errors = errors
 
 // this below code is not neccessary as a beginner but as a production level developer you have to write this to dig in deep
-        if(statck){
-            this.stack = statck
+        if(stack){
+            this.stack = stack
         }else{
             Error.captureStackTrace(this, this.constructor)
         }
