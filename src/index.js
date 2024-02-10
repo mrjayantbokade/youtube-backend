@@ -17,8 +17,7 @@ dotenv.config({
 
 const app = express()
 
-connectDB()
-.then(() =>{
+connectDB().then(() =>{
 
     app.get('/', (req, res) =>{
         res.send("hello bhai jan ")
