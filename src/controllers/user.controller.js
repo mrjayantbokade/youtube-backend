@@ -5,7 +5,7 @@ import {User} from "../models/user.model.js"
 import { existsSync } from "fs"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { upload } from "../middlewares/multer.middleware.js"
-import ApiResponse from "../utils/ApiResponse.js";
+import {ApiResponse} from "../utils/ApiResponse.js";
 
 
 
@@ -87,9 +87,9 @@ const registerUser = asyncHandler( async (req, res) => {
 
     // pro
     return res.status(201).json(
-        {
-            new ApiResponse(200, createdUser, "USER CREATED SUCCESSFULLY")
-        }
+        
+            new ApiResponse(200, createdUser, "USER CREATED SUCCESSFULLY"),
+        
     )
 
 } )
