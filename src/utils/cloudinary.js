@@ -23,16 +23,17 @@ const uploadOnCloudinary = async(localFilePath) =>{
     try {
         
         // if file not found give error and return
-        if(!localFilePath) return error("No file found: browse file and select the file and then click on upload");
+        if(!localFilePath) return null
 
         // otherwise do this
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
         })
 
-        console.log(`file uploaded successfully ${response.url}`);
+        // console.log(`file uploaded successfully ${response.url}`);
 
-        console.log(`See what you got ${response}`);
+        // console.log(`See what you got ${response}`);
+        fs.unlinkSync(localFilePath)
         return response
 
     } catch (error) {
