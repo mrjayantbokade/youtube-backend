@@ -1,7 +1,9 @@
 import mongoose, { trusted } from "mongoose";
 import { Schema } from "mongoose";
 import bcrypt from "bcrypt"
-import { Jwt } from "jsonwebtoken";
+import pkg from 'jsonwebtoken';
+const { Jwt } = pkg;
+
 import dotenv from "dotenv"
 
 dotenv.config({
@@ -75,7 +77,7 @@ userSchema.pre("save", async function(next){
 
     // same logic but way is different
     if(!this.isModified("password")) return next();
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
@@ -83,7 +85,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 }
 
 userSchema.methods.generateAccessToken = function(){
-    jwt.sign(
+    Jwt.sign(
         {
             _id: this._id,
             email: this.email,
@@ -99,7 +101,7 @@ userSchema.methods.generateAccessToken = function(){
 }
 
 userSchema.methods.generateRefreshToken = function(){
-    jwt.sign(
+    Jwt.sign(
         {
             _id: this._id,
            

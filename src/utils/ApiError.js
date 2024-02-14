@@ -4,7 +4,7 @@ import { stat } from "fs";
 class ApiError extends Error{
     constructor(
         statusCode,
-        message = "Something went wrong in api errors response go to Api Error or deep",
+        message = "Something went wrong in api errors response go to where you used ApiError object",
         errors = [],
         stack = ""
     ){
