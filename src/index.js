@@ -20,7 +20,7 @@ dotenv.config({
 connectDB().then(() =>{
 
     app.get('/', (req, res) =>{
-        res.send("hello bhai jan ")
+        res.send("Database connected")
     })
 
 
