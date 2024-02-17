@@ -2,11 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors"
 import express, { urlencoded } from "express"
 
-import dotenv from "dotenv"
-import path from "path";
-dotenv.config({
-    path:"./env"
-})
+
 
 const app = express()
 

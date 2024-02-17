@@ -8,15 +8,32 @@ import  {upload}  from "../middlewares/multer.middleware.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 
+
 const generateAccessAndRefreshTokens = async (userId) => {
 
     try {
         const user = await User.findById(userId)
+        // console.log("INSIDE GENERATE ASSCESS AND REFRESH TOKENS AND USER PRINTING VIA ._ID",user);
         const accesstoken = user.generateAccessToken()
-        const refreshtoken = user.generateRefreshToken()
-        user.refreshToken = refreshtoken
-        await user.save({ validateBeforeSave: false })
+        // console.log("ACCESS TOKEN" , accesstoken);
 
+        const refreshtoken = user.generateRefreshToken()
+        // console.log("REFRESH TOKEN" , refreshtoken);
+
+        // initially refresh token was empty come with register response but we have to update here cause it is a object 
+
+        user.refreshToken = refreshtoken
+
+        // console.log("refreshtoken re-assigned" , user.refreshToken);
+
+        await user.save({ validateBeforeSave: false })
+        // console.log("SAVED USER" , user);
+
+
+        // console.log("ACCESS TOKEN" , accesstoken);
+
+
+        // console.log("RETURNNING BOTH");
         return { accesstoken, refreshtoken }
 
 
@@ -124,6 +141,10 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
     })
 
+
+
+
+    //loginUser
     const loginUser = asyncHandler(async (req, res) => {
         // take username/email and password from user
         // check if user exists
@@ -133,8 +154,16 @@ const generateAccessAndRefreshTokens = async (userId) => {
         // check username and email and password in User.model.js
         // then route user to dashboard or home page
 
-        const { email, username, password } = req.body
+        // const {email, username, password} = req.body
 
+        const username = "fourthusername"
+        const password = "fourthpass"
+        const email = "fourthemail"
+
+
+
+
+    
 
         if (!username && !email) {
             throw new ApiError(400, "username or email is required")
@@ -144,28 +173,43 @@ const generateAccessAndRefreshTokens = async (userId) => {
         //  if (username || email && password) {
         //
         // }
+        // const existedUser = await User.findOne({
+        //     $or: [{ username }, { email }]
+        // })
 
         const user = await User.findOne({
-            $or: [{ username: username.toLowerCase() }, { email: email.toLowerCase() }]
+            $or: [{username}, {email}]
         })
+
+      
+    
+    
+
+        // const user = await User.findOne(username)
+        // console.log(user);
 
         if (!user) {
             throw new ApiError(404, "user not found")
         }
 
-        const ispasswordCorrect = await user.isPasswordCorrect(password)
-        if (!ispasswordCorrect) {
+
+        // console.log(user.password);
+        
+        const isPasswordValid = await user.isPasswordCorrect(password)
+
+        console.log(isPasswordValid);
+        if (!isPasswordValid) {
             throw new ApiError(401, "Invalid credentials")
         }
 
 
         //because generateAccessAndRefreshToken() returns an two object values
-        const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
         const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
         const options = {
             httpOnly: true,
-            secure: true,
+            secure: true
         }
 
         return res
@@ -175,7 +219,9 @@ const generateAccessAndRefreshTokens = async (userId) => {
             .json(
                 new ApiResponse(
                     200,
-                    { user: loggedInUser, accessToken, refreshToken },
+                    {
+                        user: loggedInUser, accessToken, refreshToken
+                    },
                     "User logged in successfully"
                 )
             )
@@ -188,8 +234,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
         await User.findByIdAndUpdate(
             req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -206,7 +252,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
             .status(200)
             .clearCookie("accessToken", options)
             .clearCookie("refreshToken", options)
-            .json(new ApiResponse(200, "User logged out successfully"))
+            .json(new ApiResponse(200, {}, "User logged out successfully"))
         
         
     })
@@ -214,6 +260,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 
 
+
+   
 
     export {
         registerUser,
