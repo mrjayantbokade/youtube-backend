@@ -15,17 +15,20 @@ const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId)
         // console.log("INSIDE GENERATE ASSCESS AND REFRESH TOKENS AND USER PRINTING VIA ._ID",user);
-        const accesstoken = user.generateAccessToken()
-        // console.log("ACCESS TOKEN" , accesstoken);
+        const accessToken = user.generateAccessToken()
 
-        const refreshtoken = user.generateRefreshToken()
-        // console.log("REFRESH TOKEN" , refreshtoken);
+        console.log("ACCESS TOKEN" , accessToken);
+
+        const refreshToken = user.generateRefreshToken()
+        console.log("REFRESH TOKEN" , refreshToken);
 
         // initially refresh token was empty come with register response but we have to update here cause it is a object 
 
-        user.refreshToken = refreshtoken
+        user.accessToken = accessToken
+        user.refreshToken = refreshToken
 
-        // console.log("refreshtoken re-assigned" , user.refreshToken);
+        console.log("accesstoken re-assigned" , user.accessToken);
+        console.log("refreshtoken re-assigned" , user.refreshToken);
 
         await user.save({ validateBeforeSave: false })
         // console.log("SAVED USER" , user);
@@ -34,8 +37,9 @@ const generateAccessAndRefreshTokens = async (userId) => {
         // console.log("ACCESS TOKEN" , accesstoken);
 
 
-        // console.log("RETURNNING BOTH");
-        return { accesstoken, refreshtoken }
+        console.log("RETURNNING BOTH");
+
+        return { accessToken, refreshToken }
 
 
     } catch (error) {
@@ -207,12 +211,18 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
         //because generateAccessAndRefreshToken() returns an two object values
         const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
-        const loggedInUser = await User.findById(user._id)
-            // .select("-password -refreshToken")
+        const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+        
+        console.log(loggedInUser);
+        console.log(accessToken);
+        console.log(refreshToken);
+        
+        
+           
 
         const options = {
-            httpOnly: false,
-            secure: false
+            httpOnly: true,
+            secure: true
         }
 
         return res
