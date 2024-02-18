@@ -9,11 +9,12 @@ dotenv.config({
 })
 
 
-export const verifyJWT = asyncHandler( async (req, res, next) => {
+export const verifyJWT = asyncHandler( async (req, _, next) => {
    try {
     const token =  req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
  
-       console.log(token);
+     console.log("TOKENM", token);
+     console.log("HELLO TOKEN");
      if(!token){
          throw new ApiError(401, "Unauthorized")
  
@@ -29,6 +30,7 @@ export const verifyJWT = asyncHandler( async (req, res, next) => {
        req.user = user;
      next()
    } catch (error) {
+     console.log("ERROR AT CATCH");
        throw new ApiError(401,error?.message || "Invalid Access Token")
     
    }

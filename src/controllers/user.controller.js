@@ -6,6 +6,7 @@ import { existsSync } from "fs"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import  {upload}  from "../middlewares/multer.middleware.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+import bodyParser from "body-parser"
 
 
 
@@ -154,11 +155,12 @@ const generateAccessAndRefreshTokens = async (userId) => {
         // check username and email and password in User.model.js
         // then route user to dashboard or home page
 
-        // const {email, username, password} = req.body
+        const {email, username, password} = req.body
+        console.log(email, username, password);
 
-        const username = "fourthusername"
-        const password = "fourthpass"
-        const email = "fourthemail"
+        // const username = "fourthusername"
+        // const password = "fourthpass"
+        // const email = "fourthemail"
 
 
 
@@ -205,11 +207,12 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
         //because generateAccessAndRefreshToken() returns an two object values
         const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
-        const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+        const loggedInUser = await User.findById(user._id)
+            // .select("-password -refreshToken")
 
         const options = {
-            httpOnly: true,
-            secure: true
+            httpOnly: false,
+            secure: false
         }
 
         return res
@@ -234,8 +237,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
         await User.findByIdAndUpdate(
             req.user._id,
         {
-            $unset: {
-                refreshToken: 1
+            $set: {
+                refreshToken: undefined
             }
         },
         {
@@ -245,7 +248,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
         const options = {
             httpOnly: true,
-            secure: true,
+            secure: true
         }
 
         return res
