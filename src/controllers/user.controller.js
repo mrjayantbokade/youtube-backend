@@ -8,6 +8,7 @@ import  {upload}  from "../middlewares/multer.middleware.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import bodyParser from "body-parser"
 import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
 
 
 
@@ -341,11 +342,13 @@ const changeCurrentPassword = asyncHandler(async  (req, res) => {
             throw new ApiError(401, "PASSWORD INCORRECT")
         }
 
+
+
         await User.findByIdAndUpdate(
             user._id,
             {
                 $set:{
-                    password: newPassword
+                    password: await bcrypt.hash(newPassword, 10)
                 }
             },
             {
