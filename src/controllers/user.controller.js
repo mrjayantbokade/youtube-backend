@@ -7,6 +7,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import  {upload}  from "../middlewares/multer.middleware.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import bodyParser from "body-parser"
+import jwt from "jsonwebtoken"
 
 
 
@@ -17,18 +18,18 @@ const generateAccessAndRefreshTokens = async (userId) => {
         // console.log("INSIDE GENERATE ASSCESS AND REFRESH TOKENS AND USER PRINTING VIA ._ID",user);
         const accessToken = user.generateAccessToken()
 
-        console.log("ACCESS TOKEN" , accessToken);
+        // console.log("ACCESS TOKEN" , accessToken);
 
         const refreshToken = user.generateRefreshToken()
-        console.log("REFRESH TOKEN" , refreshToken);
+        // console.log("REFRESH TOKEN" , refreshToken);
 
         // initially refresh token was empty come with register response but we have to update here cause it is a object 
 
         user.accessToken = accessToken
         user.refreshToken = refreshToken
 
-        console.log("accesstoken re-assigned" , user.accessToken);
-        console.log("refreshtoken re-assigned" , user.refreshToken);
+        // console.log("accesstoken re-assigned" , user.accessToken);
+        // console.log("refreshtoken re-assigned" , user.refreshToken);
 
         await user.save({ validateBeforeSave: false })
         // console.log("SAVED USER" , user);
@@ -37,7 +38,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
         // console.log("ACCESS TOKEN" , accesstoken);
 
 
-        console.log("RETURNNING BOTH");
+        // console.log("RETURNNING BOTH");
 
         return { accessToken, refreshToken }
 
@@ -274,10 +275,110 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 
 
-   
+    const refreshAccessToken = asyncHandler(async (req, res) => {
+        
+        const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshAccessToken || req.query.refreshAccessToken
+
+        if (!incomingRefreshToken) {
+            throw new ApiError(401, "Unauthorized")
+        }
+
+
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+
+        const user = await User.findById(decodedToken._id)
+
+        if (incomingRefreshToken !== user?.refreshToken ) {
+            throw new ApiError(401, "reFRESH TOKEN IS EXPIRED OR USED")
+        }
+
+        const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken)
+        .cookie("refreshToken", newRefreshToken)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    accessToken,
+                    refreshToken: newRefreshToken
+                },
+                "Access token refreshed successfully"
+            )    
+        )
+
+
+    })
+
+
+
+const changeCurrentPassword = asyncHandler(async  (req, res) => {
+
+    try{
+        const {oldPassword, newPassword} = req.body
+        // const initUser = req.user
+        // console.log("THIS IS USER IN inituser", initUser)
+
+        // console.log(oldPassword, newPassword)
+        const user = await User.findById(req.user?._id).select("-refreshToken")
+
+
+        // console.log("THIS IS USER IN CHANGECURRENTPASSWORD", user)
+        if (!user) {
+            new ApiError(401, "User not found")
+        }
+
+        const checkOldPassword = await user.isPasswordCorrect(oldPassword)
+
+
+        if (!checkOldPassword) {
+            throw new ApiError(401, "PASSWORD INCORRECT")
+        }
+
+        await User.findByIdAndUpdate(
+            user._id,
+            {
+                $set:{
+                    password: newPassword
+                }
+            },
+            {
+                new: true
+            }
+
+        )
+
+
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    { },
+                    "PASSWORD CHANGED SUCCESSFULLY"
+                )
+            )
+
+    }catch (error){
+        throw new ApiError(501, "SOMETHING WENT WRONG WHILE UPDATING PASSWORD")
+    }
+
+
+
+
+})
 
     export {
         registerUser,
         loginUser,
-        logoutUser
+        logoutUser,
+        refreshAccessToken,
+        changeCurrentPassword,
     }

@@ -66,6 +66,16 @@ const userSchema = new Schema(
 }, {timestamps: true})
 
 
+userSchema.pre("update", async function(next) {
+    // const password = this.getUpdate().$set.field;
+    if (!this.password) {
+        return next();
+    }
+
+    this.password = await bcrypt.hash(this.password, 10)
+    next();
+})
+
 
 userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();
