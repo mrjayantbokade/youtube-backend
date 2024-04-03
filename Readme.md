@@ -1,1 +1,1 @@
-#here are we building the own youtube application with fully backend ready
+#here are we building the youtube application with fully backend ready
